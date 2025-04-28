@@ -2,58 +2,69 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import YahooFinance from "yahoo-finance2";
-import app from "@/config.js";
+import { auth } from "../config.js";
 
-function Dashboard() {
-  const auth = getAuth(app);
+export default function Dashboard() {
   const router = useRouter();
+  const [symbol, setSymbol] = useState(null);
   const [user, setUser] = useState(null);
-  const [symbol, setSymbol] = useState("goog");
   const [price, setPrice] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            setUser(user);
-        } else {
-            router.push("/");
-        }
+      if (user) {
+        setUser(user);
+      } else {
+        router.push("/");
+      }
     });
 
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [router]);
 
   const handleLogout = async () => {
     try {
-        await signOut(auth);
-        router.push("/");
+      await signOut(auth);
+      router.push("/");
     } catch (error) {
-        console.error("Error signing out: ", error);  
+      console.error("Error signing out: ", error);
     }
   };
 
-  const fetchStockPrice = async () => {
+  const fetchStockData = async () => {
+    const apiKey = "d06j14pr01qg26s894bgd06j14pr01qg26s894c0";
+    const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`;
+
     try {
-        const result = await YahooFinance.quote("AAPL");
-        setPrice(result.regularMarketPrice);
-        setError(null);
-    } catch (err) {
-        console.error("Error fetching stock price: ", err);
-        setError("Failed to fetch stock price. Please check the symbol.");
-        setPrice(null);
+      if (!symbol || symbol.trim() === "") {
+        throw new Error("Please enter a valid stock symbol.");
+      }
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch stock data.");
+      }
+
+      const data = await response.json();
+
+      if (!data || !data.c) {
+        throw new Error("No stock data available for the given symbol.");
+      }
+
+      setPrice(data.c);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching stock data:", error);
+      setError(error.message);
     }
   };
-  
-  useEffect(() => {
-    fetchStockPrice();
-  }, []);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center bg-background text-white p-4">
-        <h1 className="text-4xl font-bold">Hey {user ? user.displayName : "User"}!</h1>
+      <div className="flex justify-between items-cente text-white p-4">
+        <h1 className="text-4xl font-bold mr-5">Hey {user ? user.displayName : "User"}!</h1>
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
@@ -71,13 +82,14 @@ function Dashboard() {
             <input
               type="text"
               id="symbol"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
-              className="w-full border text-gray-600 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={symbol ?? ""}
+              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+              className="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., AAPL"
             />
           </div>
           <button
-            onClick={fetchStockPrice}
+            onClick={fetchStockData}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded cursor-pointer"
           >
             Get Stock Price
@@ -85,7 +97,7 @@ function Dashboard() {
           <div className="mt-4">
             {price ? (
               <p className="text-green-600 font-bold">
-                Current Price: <strong>${price}</strong>
+                Current Price: <strong>${price.toFixed(2)}</strong>
               </p>
             ) : error ? (
               <p className="text-red-600">{error}</p>
@@ -98,5 +110,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

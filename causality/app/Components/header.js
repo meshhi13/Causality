@@ -1,6 +1,4 @@
 "use client";
-import app from "@/config.js";
-
 
 function Header() {
     return (

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import app from '../config';
+import { auth, provider } from './config';
 import { getAuth, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { GoogleButton }from 'react-google-button'
@@ -12,7 +12,7 @@ function Home () {
   const router = useRouter();
 
   useEffect(() => {
-    const auth = getAuth(app);
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
@@ -26,7 +26,6 @@ function Home () {
   }, []);
 
   const handleGoogleLogin = async () => {
-    const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
