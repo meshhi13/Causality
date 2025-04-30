@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "highlight-text": "^0.1.0",
+    "react-autocomplete": "^1.8.1"
+  }
+}

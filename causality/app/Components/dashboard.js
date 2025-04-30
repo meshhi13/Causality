@@ -3,14 +3,30 @@ import React, { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../config.js";
+import AutocompleteDropdown from "./autocomplete.js";
 
 export default function Dashboard() {
+  const apiKey = "d06j14pr01qg26s894bgd06j14pr01qg26s894c0";
   const router = useRouter();
+  const [entries, setEntries] = useState([]);
   const [symbol, setSymbol] = useState(null);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null)
   const [price, setPrice] = useState(null);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchTickers = async () => {
+      try {
+        const tickers = await getExchangeTickers();
+        setEntries(tickers);
+      } catch (error) {
+        console.error("Error fetching tickers:", error);
+      }
+    };
+
+    fetchTickers();
+  }, []);
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -32,12 +48,40 @@ export default function Dashboard() {
     }
   };
 
-  const fetchStockData = async () => {
-    const apiKey = "d06j14pr01qg26s894bgd06j14pr01qg26s894c0";
-    const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`;
+  const getExchangeTickers = async () => {
+    const url_nasdaq= `https://finnhub.io/api/v1/stock/symbol?exchange=US&mic=XNAS&token=${apiKey}`;
+    const url_nyse = `https://finnhub.io/api/v1/stock/symbol?exchange=US&mic=XNYS&token=${apiKey}`;
+    
+    const response_nasdaq = await fetch(url_nasdaq);
+    const response_nyse = await fetch(url_nyse);
+
+    if (!response_nasdaq.ok || !response_nyse.ok) {
+      throw new Error("Failed to fetch stock data.");
+    }
+
+    const listOfEntries = []
+    const data_nasdaq = await response_nasdaq.json();
+    const data_nyse = await response_nyse.json()
+    for (let i = 0; i < Object.keys(data_nasdaq).length; i++ ){
+      listOfEntries.push(data_nasdaq[i].displaySymbol)
+    }
+    for (let i = 0; i < Object.keys(data_nyse).length; i++ ){
+      listOfEntries.push(data_nyse[i].displaySymbol)
+    }
+
+    return listOfEntries;
+  }
+
+  const handleAutoCompleteClick = (selectedSymbol) => {
+    setSymbol(selectedSymbol)
+    fetchStockData(selectedSymbol)
+  }
+  const fetchStockData = async (symbolToFetch) => {
+    console.log(symbolToFetch)
+    const url = `https://finnhub.io/api/v1/quote?symbol=${symbolToFetch}&token=${apiKey}`;
 
     try {
-      if (!symbol || symbol.trim() === "") {
+      if (!symbolToFetch || symbolToFetch.trim() === "") {
         throw new Error("Please enter a valid stock symbol.");
       }
 
@@ -55,9 +99,11 @@ export default function Dashboard() {
 
       setPrice(data.c);
       setError(null);
+    
     } catch (error) {
       console.error("Error fetching stock data:", error);
       setError(error.message);
+      setPrice(null)
     }
   };
 
@@ -79,17 +125,10 @@ export default function Dashboard() {
             <label htmlFor="symbol" className="block text-gray-700 font-medium mb-2">
               Enter Stock Symbol:
             </label>
-            <input
-              type="text"
-              id="symbol"
-              value={symbol ?? ""}
-              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-              className="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., AAPL"
-            />
+            <AutocompleteDropdown suggestions={entries} onSelect={handleAutoCompleteClick} />
           </div>
           <button
-            onClick={fetchStockData}
+            onClick={() => fetchStockData(symbol)}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded cursor-pointer"
           >
             Get Stock Price
