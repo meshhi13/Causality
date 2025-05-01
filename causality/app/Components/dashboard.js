@@ -9,7 +9,7 @@ import AutocompleteDropdown from "./autocomplete.js";
 import { Routes, Route, Link } from 'react-router-dom';
 
 export default function Dashboard() {
-  const apiKey = "d06j14pr01qg26s894bgd06j14pr01qg26s894c0";
+  const apiKey = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
   const router = useRouter();
   const [entries, setEntries] = useState([]);
   const [symbol, setSymbol] = useState(null);
