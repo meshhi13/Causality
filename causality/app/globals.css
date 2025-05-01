@@ -15,10 +15,52 @@
   --font-mono: var(--font-geist-mono);
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-main);
+}
+
+h1 {
+  font-size: 1.5rem; /* Default size */
+}
+
+@media (min-width: 640px) { /* Small screens (sm) */
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+p, div, input, button {
+  font-size: small;
+}
+
+@media (min-width: 640px) { /* Small screens (sm) */
+  p, div, input, button {
+    font-size: medium;
+  }
+}
+
+
+button {
+  font-family: var(--font-main);
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.025);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -26,4 +68,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-main);
+}
+
+.Toastify__toast {
+  border-radius: 8px;
+  font-size: 16.5px;
 }

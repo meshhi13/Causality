@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "firebase-admin": "^13.3.0",
     "highlight-text": "^0.1.0",
-    "react-autocomplete": "^1.8.1"
+    "react-autocomplete": "^1.8.1",
+    "react-toastify": "^11.0.5"
   }
 }
