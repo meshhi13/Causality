@@ -13,7 +13,7 @@ export default function Header() {
     };
 
     return (
-        <header className="header border-2 border-gray-300 p-4 bg-100 sticky top-0 z-50 h-2/10 bg-black">
+        <header className="header border-2 border-gray-300 p-4 bg-100 sticky top-0 z-99 h-2/10 bg-black">
             <div className="container mx-auto flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Causality</h1>
                 <nav>

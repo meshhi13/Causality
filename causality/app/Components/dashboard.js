@@ -78,13 +78,12 @@ export default function Dashboard() {
       if (allTickers.includes(symbolToAdd)) {
         throw new Error("Symbol already added");
       }
-      const docRef = await addDoc(collection(db, user?.uid), stockObject);
+      const docRef = await addDoc(collection(db, "users", user?.uid, "watchlist"), stockObject);
       toast.success(symbolToAdd + " added to watchlist", {
         style: {
           backgroundColor: "#5ced7380",
-          color: "#ffffff",
-          fontWeight: "bold",
-          textAlign: "center",
+          fontWeight: "lighter",
+          fontSize: 15
         }
       });
       console.log("Stock added with ID: ", docRef.id);
@@ -94,9 +93,8 @@ export default function Dashboard() {
         toast.info("Stock has already been added!", {
           style: {
             backgroundColor: "#95b9f0",
-            color: "#ffffff",
-            fontWeight: "bold",
-            textAlign: "center"
+            fontWeight: "lighter",
+            fontSize: 15
           }
         });
       }
@@ -105,9 +103,8 @@ export default function Dashboard() {
         toast.error("Could not add stock to watchlist", {
           style: {
             backgroundColor: "#ed766d",
-            color: "#ffffff",
-            fontWeight: "bold",
-            textAlign: "center"
+            fontWeight: "lighter",
+            fontSize: 15
           }
         });
       }
@@ -116,7 +113,7 @@ export default function Dashboard() {
 
   const fetchWatchlist = async () => {
     try {
-      const q = query(collection(db, user?.uid));
+      const q = query(collection(db, "users", user?.uid, "watchlist"));
       const querySnapshot = await getDocs(q);
       const stocks = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setWatchlist(stocks);

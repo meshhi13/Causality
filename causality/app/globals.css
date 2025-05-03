@@ -72,5 +72,7 @@ body {
 
 .Toastify__toast {
   border-radius: 8px;
-  font-size: 16.5px;
+  color: #ffffff;
+  text-align: center;
+  font-family: var(--font-main);
 }

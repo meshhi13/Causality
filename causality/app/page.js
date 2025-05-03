@@ -17,6 +17,7 @@ function Home () {
       router.push("/dashboard")
     }}
   ); 
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
