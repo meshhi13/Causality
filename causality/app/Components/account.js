@@ -294,15 +294,33 @@ export default function Account() {
               Purchases
             </h1>
             {purchases.length > 0 ? (
-              <div className="flex-grow flex items-center justify-center">
-                <ul>
-                    {purchases.map((purchase) => (
-                        <li key={purchase.id}>
-                            <span>{moment(purchase.date).format('YYYY-MM-DD HH:mm:ss')}</span>
-                        </li>
-                    ))}
-                </ul>
-              </div>
+                <div className="flex-grow flex items-center justify-center w-full ">
+                    <div className="overflow-y-auto h-7/8 w-full lg:mr-10">
+                        <ul className="w-full items-center text-center">
+                            {purchases.map((purchase) => (
+                            <li
+                                key={`${purchase.symbol}-${purchase.date}`} 
+                                className="text-gray-700 border-b border-gray-300 py-4 px-6 flex justify-between items-center"
+                            >
+                                <div className="text-left w-1/2">
+                                <p className="font-bold text-lg">{purchase.symbol}</p>
+                                <p className="text-sm text-gray-500">
+                                    Quantity: {purchase.stockQuantity}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Price: ${purchase.price.toFixed(2)}
+                                </p>
+                                </div>
+                                <div className="text-right w-1/2">
+                                    <p className="text-sm text-gray-500">
+                                        {moment(purchase.date).format("MMM DD YYYY, hh:mm")}
+                                    </p>
+                                </div>
+                            </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
             ) : (
             <div className="flex-grow flex items-center justify-center">
                 <p className="text-gray-500 mb-5 lg:mb-0 text-center">
