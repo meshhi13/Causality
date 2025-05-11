@@ -182,58 +182,60 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="flex justify-between items-center text-white p-4">
-          <h1 className="text-4xl font-bold">Hey {user ? user.displayName : "User"}!</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-          >
-            Logout
-          </button>
-        </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-600">Stock Price Checker</h2>
-          <div className="mb-4">
-            <label htmlFor="symbol" className="block text-gray-700 font-medium mb-2">
-              Enter Stock Symbol:
-            </label>
-            <AutocompleteDropdown 
-              suggestions={entries}
-              onSelect={handleAutoCompleteClick} 
-              symbol={symbol} 
-              setSymbol={setSymbol}
-            />
-          </div>
-          <div className="flex flex-col md:flex-row gap-4">
+    <div className="flex-grow flex items-center justify-center">
+      <div className="flex flex-col h-full w-full items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="flex justify-between items-center text-white p-4">
+            <h1 className="text-4xl font-bold">Hey {user ? user.displayName : "User"}!</h1>
             <button
-              onClick={() => fetchStockData(symbol)}
-              className="w-full md:w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md border-1 border-white cursor-pointer"
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
             >
-              Get Quote
-            </button>
-            <button
-              onClick={() => handleAddToList(symbol)}
-              className="w-full md:w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md border-1 border-white cursor-pointer"
-            >
-              Add to List
+              Logout
             </button>
           </div>
-          <div className="mt-4">
-            {price ? (
-              <p className="text-green-600 font-bold">
-                Current Price: <strong>${price.toFixed(2)}</strong>
-              </p>
-            ) : error ? (
-              <p className="text-red-600">{error}</p>
-            ) : (
-              <p className="text-gray-600">Enter a stock symbol to get the price.</p>
-            )}
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-600">Stock Price Checker</h2>
+            <div className="mb-4">
+              <label htmlFor="symbol" className="block text-gray-700 font-medium mb-2">
+                Enter Stock Symbol:
+              </label>
+              <AutocompleteDropdown 
+                suggestions={entries}
+                onSelect={handleAutoCompleteClick} 
+                symbol={symbol} 
+                setSymbol={setSymbol}
+              />
+            </div>
+            <div className="flex flex-col md:flex-row gap-4">
+              <button
+                onClick={() => fetchStockData(symbol)}
+                className="w-full md:w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md border-1 border-white cursor-pointer"
+              >
+                Get Quote
+              </button>
+              <button
+                onClick={() => handleAddToList(symbol)}
+                className="w-full md:w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md border-1 border-white cursor-pointer"
+              >
+                Add to List
+              </button>
+            </div>
+            <div className="mt-4">
+              {price ? (
+                <p className="text-green-600 font-bold">
+                  Current Price: <strong>${price.toFixed(2)}</strong>
+                </p>
+              ) : error ? (
+                <p className="text-red-600">{error}</p>
+              ) : (
+                <p className="text-gray-600">Enter a stock symbol to get the price.</p>
+              )}
+            </div>
           </div>
         </div>
+        <ToastContainer autoClose={1500} position="bottom-right" />
       </div>
-      <ToastContainer autoClose={1500} position="bottom-right" />
     </div>
   );
 }

@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../config";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, query, deleteDoc, doc, setDoc, getDoc, addDoc } from "firebase/firestore";
+import { collection, getDocs, query, deleteDoc, doc, setDoc, getDoc, addDoc, where } from "firebase/firestore";
 import moment from 'moment';
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Account() {
   const apiKey = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
@@ -16,6 +17,83 @@ export default function Account() {
   const [assets, setAssets] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [balance, setBalance] = useState(null);
+  
+  const handleSellAsset = async () => {
+    try {
+      const assetsRef = collection(db, "users", user?.uid, "assets");
+      const assetQuery = query(assetsRef, where("symbol", "==", selectedStock));
+      const assetSnapshot = await getDocs(assetQuery);
+  
+      if (!assetSnapshot.empty) {
+        const assetDoc = assetSnapshot.docs[0];
+        const assetDocRef = doc(db, "users", user?.uid, "assets", assetDoc.id);
+        const currentAsset = assetDoc.data();
+  
+        if (quantity > currentAsset.stockQuantity) {      
+          throw new Error("Sell quantity exceeds available quantity.");
+        }
+  
+        const updatedQuantity = currentAsset.stockQuantity - quantity;
+  
+        if (updatedQuantity > 0) {
+          await setDoc(assetDocRef, {
+            ...currentAsset,
+            stockQuantity: updatedQuantity,
+          });
+        } else {
+          await deleteDoc(assetDocRef);
+        }
+  
+        const balanceDocRef = doc(db, "users", user?.uid);
+        const balanceDoc = await getDoc(balanceDocRef);
+  
+        if (!balanceDoc.exists()) {
+          throw new Error("User balance document does not exist.");
+        }
+  
+        const currentBalance = balanceDoc.data().balance;
+        const totalSaleValue = quantity * selectedStockPrice;
+  
+        await setDoc(balanceDocRef, {
+          ...balanceDoc.data(),
+          balance: currentBalance + totalSaleValue,
+        });
+  
+        setAssets((prev) =>
+          prev
+            .map((asset) =>
+              asset.id === assetDoc.id
+                ? { ...asset, stockQuantity: updatedQuantity }
+                : asset
+            )
+            .filter((asset) => asset.stockQuantity > 0)
+        );
+  
+        setBalance((prev) => prev + totalSaleValue);
+  
+        closePopup();
+        toast.success(`Sold ${quantity} shares of ${selectedStock}`, {
+            style: {
+                backgroundColor: "#5ced7380",   
+                fontWeight: "lighter",
+                fontSize: 15
+            }
+        });
+      } else {
+        throw new Error("Asset not found in user's assets.");
+      }
+    } catch (error) {
+      toast.error("Could not sell assets.", {
+          style: {
+              backgroundColor: "#ed766d",
+              fontWeight: "lighter",
+              fontSize: 15
+            }
+      });
+      console.error("Error selling asset:", error);
+      closePopup();
+    }
+  };
 
   const handleQuantityPurchase = async () => {
     try {
@@ -38,6 +116,9 @@ export default function Account() {
         balance: currentBalance - totalCost,
       });
 
+      const assetsRef = collection(db, "users", user?.uid, "assets");
+      const purchasesRef = collection(db, "users", user?.uid, "purchases");
+
       const purchaseObject = {
         symbol: selectedStock,
         price: selectedStockPrice,
@@ -45,16 +126,52 @@ export default function Account() {
         date: new Date(),
       };
 
-      const purchasesRef = collection(db, "users", user?.uid, "purchases");
+      const assetQuery = query(assetsRef, where("symbol", "==", selectedStock));
+      const assetSnapshot = await getDocs(assetQuery);
+
+      if (!assetSnapshot.empty) {
+        const assetDoc = assetSnapshot.docs[0];
+        const existingAsset = assetDoc.data();
+        const updatedQuantity = existingAsset.stockQuantity + quantity;
+
+        await setDoc(doc(db, "users", user?.uid, "assets", assetDoc.id), {
+          ...existingAsset,
+          stockQuantity: updatedQuantity,
+        });
+
+        setAssets((prev) =>
+          prev.map((asset) =>
+            asset.symbol === selectedStock ? { ...asset, stockQuantity: updatedQuantity } : asset
+          )
+        );
+      }
+
+      else {
+        await addDoc(assetsRef, purchaseObject);
+        setAssets((prev) => [...prev, purchaseObject]);
+      }
+
       await addDoc(purchasesRef, purchaseObject);
 
       setBalance(currentBalance - totalCost);
       setPurchases((prev) => [...prev, purchaseObject]);
-      console.log(purchases)
 
-      console.log("Purchase successful:", purchaseObject);
       closePopup();
+      toast.success(`Purchased ${quantity} shares of ${selectedStock}`, {
+        style: {
+            backgroundColor: "#ed766d",
+            fontWeight: "lighter",
+            fontSize: 15
+          }
+        });
     } catch (error) {
+      toast.error("Could not purchase assets.", {
+        style: {
+          backgroundColor: "#ed766d",
+          fontWeight: "lighter",
+          fontSize: 15
+        }
+     });
       console.error("Error handling purchase:", error);
     }
   };
@@ -65,7 +182,8 @@ export default function Account() {
         setUser(selectedUser);
         await initializeUserAccount(selectedUser.uid);
         fetchWatchlist(selectedUser.uid);
-        fetchPurchases(selectedUser.uid)
+        fetchPurchases(selectedUser.uid);
+        fetchAssets(selectedUser.uid);
       } else {
         setUser(null);
         console.log("No user is signed in.");
@@ -85,7 +203,6 @@ export default function Account() {
           createdAt: new Date(),
         });
         setBalance(100000)
-        console.log("User account initialized with $100,000.");
       }
       else {
         setBalance(userDoc.data().balance);
@@ -109,9 +226,10 @@ export default function Account() {
           date: data.date?.toDate(),
         };
       });
+
+      purchasesData.sort((a, b) => b.date - a.date);
   
       setPurchases(purchasesData);
-      console.log("Fetched purchases:", purchasesData);
     } catch (error) {
       console.error("Error fetching purchases:", error);
     }
@@ -136,6 +254,25 @@ export default function Account() {
       console.error("Error fetching watchlist: ", error);
     }
   };
+
+  const fetchAssets = async (userId) => {
+    try {
+        const q = query(collection(db, "users", userId, "assets"));
+        const querySnapshot = await getDocs(q);
+  
+        const stocks = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            const stockData = doc.data();
+            const latestPrice = await fetchCurrentPrice(stockData.symbol);
+            return { id: doc.id, ...stockData, price: latestPrice };
+          })
+        );
+  
+        setAssets(stocks);
+      } catch (error) {
+        console.error("Error fetching assets: ", error);
+      }
+    };
 
   const fetchCurrentPrice = async (symbolToFetch) => {
     const url = `https://finnhub.io/api/v1/quote?symbol=${symbolToFetch.toUpperCase()}&token=${apiKey}`;
@@ -215,7 +352,7 @@ export default function Account() {
   };
 
   const handleQuantityChange = (e) => {
-    const value = e.target.value;
+    const value = parseInt(e.target.value || 0);
     setQuantity(value);
   };
 
@@ -243,7 +380,7 @@ export default function Account() {
                   <ul>
                     {watchlist.map((stock) => (
                       <li
-                        key={stock.id}
+                        key={stock.symbol + stock.price}
                         className="text-gray-700 mb-2 flex flex-col lg:flex-row justify-between items-center"
                       >
                         <span className="text-center lg:text-left">
@@ -295,7 +432,7 @@ export default function Account() {
             </h1>
             {purchases.length > 0 ? (
                 <div className="flex-grow flex items-center justify-center w-full ">
-                    <div className="overflow-y-auto h-7/8 w-full lg:mr-10">
+                    <div className="overflow-y-auto h-7/8 max-h-120 w-full lg:mr-10">
                         <ul className="w-full items-center text-center">
                             {purchases.map((purchase) => (
                             <li
@@ -313,7 +450,7 @@ export default function Account() {
                                 </div>
                                 <div className="text-right w-1/2">
                                     <p className="text-sm text-gray-500">
-                                        {moment(purchase.date).format("MMM DD YYYY, hh:mm")}
+                                        {moment(purchase.date).format("MMM DD YYYY, hh:mm A")}
                                     </p>
                                 </div>
                             </li>
@@ -334,17 +471,40 @@ export default function Account() {
               Assets
             </h1>
             {assets.length > 0 ? (
-              <div className="flex-grow flex items-center justify-center">
-                <p className="text-gray-500 mb-5 lg:mb-0 text-center">
-                  This is the assets section.
-                </p>
+              <div className="flex-grow flex items-center justify-center w-full">
+                <div className="overflow-y-auto h-7/8 max-h-120 w-full lg:mr-10">
+                  <ul className="w-full items-center text-center">
+                    {assets.map((asset) => (
+                      <li
+                        key={asset.id}
+                        className="text-gray-700 border-b border-gray-300 py-4 px-6 flex justify-between items-center"
+                      >
+                        <div className="text-left w-1/2">
+                          <p className="font-bold text-lg">{asset.symbol}</p>
+                          <p className="text-sm text-gray-500">
+                            Quantity: {asset.stockQuantity}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Current Price: ${asset.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="text-right w-1/2">
+                          <p className="text-sm text-gray-500">
+                            Total Value: ${(asset.stockQuantity * asset.price).toFixed(2)}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ) : (
-            <div className="flex-grow flex items-center justify-center">
+              <div className="flex-grow flex items-center justify-center">
                 <p className="text-gray-500 mb-5 lg:mb-0 text-center">
-                    No assets available
+                  No assets available
                 </p>
-            </div>)}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -371,8 +531,16 @@ export default function Account() {
               <input
                 type="number"
                 id="quantity"
-                value={quantity}
+                value={quantity == 0 ? "" : quantity}
                 onChange={handleQuantityChange}
+                onKeyDown={(e) => {
+                    if (
+                      !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(e.key) &&
+                      !/^[0-9]$/.test(e.key)
+                    ) {
+                      e.preventDefault();
+                    }
+                }}
                 className="w-full border text-gray-700 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min="1"
               />
@@ -383,21 +551,28 @@ export default function Account() {
             </p>
             <div className="flex justify-end gap-4">
               <button
-                onClick={closePopup}
+                onClick={() => closePopup()}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
               >
                 Cancel
               </button>
               <button
+                onClick={() => handleSellAsset()}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Sell
+              </button>
+              <button
                 onClick={() => handleQuantityPurchase()}
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               >
-                Confirm
+                Buy
               </button>
             </div>
           </div>
         </div>
       )}
+      <ToastContainer autoClose={1500} position="bottom-right" />
     </div>
   );
 }

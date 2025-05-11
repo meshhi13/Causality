@@ -4,7 +4,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-main: 'Cascadia Code', monospace; /* Added main font variable */
+  --font-main: 'Cascadia Code', monospace;
   cursor: default;
 }
 
@@ -20,10 +20,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 1.5rem; /* Default size */
+  font-size: 1.5rem;
 }
 
-@media (min-width: 640px) { /* Small screens (sm) */
+@media (min-width: 640px) {
   h1 {
     font-size: 2rem;
   }
@@ -33,7 +33,7 @@ p, div, input, button {
   font-size: small;
 }
 
-@media (min-width: 640px) { /* Small screens (sm) */
+@media (min-width: 640px) {
   p, div, input, button {
     font-size: medium;
   }
