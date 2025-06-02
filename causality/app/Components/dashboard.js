@@ -153,27 +153,49 @@ export default function Dashboard() {
   };
 
   const fetchStockData = async (symbolToFetch) => {
-    const url = `https://finnhub.io/api/v1/quote?symbol=${symbolToFetch.toUpperCase()}&token=${apiKey}`;
+    const symbolURL = `https://finnhub.io/api/v1/quote?symbol=${symbolToFetch.toUpperCase()}&token=${apiKey}`;
+    const descriptionURL = `https://finnhub.io/api/v1/search?q=${symbolToFetch}&exchange=US&token=${apiKey}`;
+
 
     try {
       if (!symbolToFetch || symbolToFetch.trim() === "") {
         throw new Error("Please enter a valid stock symbol.");
       }
 
-      const response = await fetch(url);
+      const symbolLookup = await fetch(symbolURL);
+      const descriptionLookup = await fetch(descriptionURL);
 
-      if (!response.ok) {
+      if (!descriptionLookup.ok) {
+        throw new Error("Failed to fetch stock description.");
+      }
+    
+      if (!symbolLookup.ok) {
         throw new Error("Failed to fetch stock data.");
       }
 
-      const data = await response.json();
+      const symbolData = await symbolLookup.json();
+      const descriptionData = await descriptionLookup.json();
 
-      if (!data || !data.c) {
+      if (!descriptionData || !descriptionData.result || descriptionData.result.length === 0) {
+        throw new Error("No description available for the given symbol.");
+      }
+      if (!symbolData || !symbolData.c) {
         throw new Error("No stock data available for the given symbol.");
       }
 
-      setPrice(data.c);
+      const response = await fetch('http://localhost:5000/api/submit_description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(descriptionData.result[0])
+      });
+      
+      console.log(response);
+
+      setPrice(symbolData.c);
       setError(null);
+
     } catch (error) {
       console.error("Error fetching stock data:", error);
       setError(error.message);

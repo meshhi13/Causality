@@ -15,6 +15,7 @@ export const metadata = {
   title: "Causality",
 };
 
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

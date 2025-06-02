@@ -472,7 +472,12 @@ export default function Account() {
             </h1>
             {assets.length > 0 ? (
               <div className="flex-grow flex items-center justify-center w-full">
-                <div className="overflow-y-auto h-7/8 max-h-120 w-full lg:mr-10">
+                <div className="overflow-y-auto h-7/8 max-h-120 w-full">
+                <div className="flex flex-col items-center w-full">
+                  <h2 className="text-xl text-gray-700">
+                      Total Assets: {parseInt(balance?.toFixed(2)) + parseInt(assets.reduce((accumulator, asset) => accumulator + (asset.stockQuantity * asset.price), 0).toFixed(2))}
+                  </h2> 
+                </div>
                   <ul className="w-full items-center text-center">
                     {assets.map((asset) => (
                       <li
