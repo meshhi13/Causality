@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Causality
+
+Causality is a full-stack web application for tracking your stock portfolio, purchases, and assets in real time. It features user authentication, a watchlist, asset management, and live price updates using the Finnhub API. The app is built with React (Next.js) and Firebase for authentication and data storage.
+## Features
+
+- **User Authentication:** Secure sign-in and sign-out with Firebase Auth.
+- **Watchlist:** Add, view, and remove stocks from your personal watchlist.
+- **Purchases & Assets:** Buy and sell stocks, track your purchase history, and view your current assets.
+- **Live Price Updates:** Fetches real-time stock prices and calculates day percent change.
+- **Balance Management:** Simulated account balance for buying and selling stocks.
+- **Responsive UI:** Modern, responsive design with React and Tailwind CSS.
+- **Notifications:** Toast notifications for actions like purchases, sales, and errors.
+
+## Technologies Used
+
+- **Frontend:** React (Next.js), Tailwind CSS, React Toastify, Moment.js
+- **Database:** Firebase Firestore
+- **Authentication:** Firebase Auth
+- **Stock Data:** [Finnhub API](https://finnhub.io/)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js & npm
+- Firebase project (for Auth and Firestore)
+- Finnhub API key
+
+### Installation
+
+1. **Clone the repository:**
+    ```sh
+    git clone https://github.com/yourusername/causality.git
+    cd causality
+    ```
+
+2. **Install frontend dependencies:**
+    ```sh
+    npm install
+    ```
+
+3. **Set up environment variables:**
+    - Create a `.env.local` file in the root directory:
+      ```
+      NEXT_PUBLIC_FINNHUB_API_KEY=your_finnhub_api_key
+      ```
+
+4. **Configure Firebase:**
+    - Add your Firebase config to `config.js` or as environment variables.
+
+5. **Run the Next.js frontend:**
+    ```sh
+    npm run dev
+    ```
+
+6. **Visit the app:**
+    - Frontend: [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+- **Sign in** to your account.
+- **Add stocks** to your watchlist.
+- **Buy or sell** assets using your simulated balance.
+- **Track your purchases** and current asset values.
+- **Remove stocks** from your watchlist as needed.
+
+## Folder Structure
+
+```
+causality/
+├── app/
+│   └── Components/
+│       ├── account.js
+│       ├── dashboard.js
+│       └── ...
+├── public/
+├── styles/
+├── .env.local
+├── package.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+This project is licensed under the MIT License.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
