@@ -2,7 +2,6 @@ import praw
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
 client_id = os.getenv("CLIENT_ID")
@@ -15,16 +14,24 @@ reddit = praw.Reddit(
     user_agent=user_agent
 )
 
-query = "climate change" 
-subreddit = reddit.subreddit("all") 
-results = subreddit.search(query, limit=5)
+def search_reddit(query):
+    subreddit = reddit.subreddit("all") 
+    results = subreddit.search(query, limit=10, sort="relevance", time_filter="week")
+    returnList = []
 
-for post in results:
-    print(f"\nTitle: {post.title}\nURL: {post.url}\n")
-    post.comments.replace_more(limit=0) 
-    for comment in post.comments[:5]:
-        if comment.author == "AutoModerator":
-            continue
-        if comment.body == "[deleted]":
-            continue
-        print(f"- {comment.body[:100]}...")
+    for post in results:
+        returnString = ""
+        returnString += f"\nTitle: {post.title}"
+        post.comments.replace_more(limit=0) 
+        returnString += f"\nBody: {post.selftext}..."
+        returnList.append(returnString)
+        for comment in post.comments[:5]:
+            if comment.author == "AutoModerator":
+                continue
+            if comment.body == "[deleted]" or comment.body == "[removed]":
+                continue
+            returnString += f"\nComment: {comment.body}..."
+        
+        returnList.append(returnString)
+    
+    return returnList
