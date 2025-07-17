@@ -1,87 +1,91 @@
 # Causality
 
-Causality is a full-stack web application for tracking your stock portfolio, purchases, and assets in real time. It features user authentication, a watchlist, asset management, and live price updates using the Finnhub API. The app is built with React (Next.js) and Firebase for authentication and data storage.
-## Features
+**Causality** is a web-based stock trading simulation app built using **Next.js**, **Firebase**, and the **Finnhub API**. It allows users to create a virtual portfolio, track real-time asset prices, and review transaction history.
 
-- **User Authentication:** Secure sign-in and sign-out with Firebase Auth.
-- **Watchlist:** Add, view, and remove stocks from your personal watchlist.
-- **Purchases & Assets:** Buy and sell stocks, track your purchase history, and view your current assets.
-- **Live Price Updates:** Fetches real-time stock prices and calculates day percent change.
-- **Balance Management:** Simulated account balance for buying and selling stocks.
-- **Responsive UI:** Modern, responsive design with React and Tailwind CSS.
-- **Notifications:** Toast notifications for actions like purchases, sales, and errors.
+https://github.com/user-attachments/assets/6247a645-212f-4b95-b390-f170d7361bec
 
-## Technologies Used
+## Requirements
 
-- **Frontend:** React (Next.js), Tailwind CSS, React Toastify, Moment.js
-- **Database:** Firebase Firestore
-- **Authentication:** Firebase Auth
-- **Stock Data:** [Finnhub API](https://finnhub.io/)
+Before running the application, make sure you have the following installed and configured:
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js & npm
-- Firebase project (for Auth and Firestore)
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project with:
+  - Google Authentication enabled
+  - Firestore database enabled
 - Finnhub API key
 
-### Installation
+## Features
 
-1. **Clone the repository:**
-    ```sh
-    git clone https://github.com/yourusername/causality.git
-    cd causality
-    ```
+- **User Authentication**: Sign in securely using your Google account via Firebase.
+- **Real-Time Stock Prices**: Live stock data from Finnhub API for realistic simulation.
+- **Buy & Sell Stocks**: Trade virtual shares with a simulated balance.
+- **Watchlist**: Add favorite stocks to your personal watchlist.
+- **Transaction History**: Track and review past buy/sell activity.
+- **Responsive UI**: Built with Tailwind CSS and React for a seamless experience across devices.
 
-2. **Install frontend dependencies:**
-    ```sh
-    npm install
-    ```
-
-3. **Set up environment variables:**
-    - Create a `.env.local` file in the root directory:
-      ```
-      NEXT_PUBLIC_FINNHUB_API_KEY=your_finnhub_api_key
-      ```
-
-4. **Configure Firebase:**
-    - Add your Firebase config to `config.js` or as environment variables.
-
-5. **Run the Next.js frontend:**
-    ```sh
-    npm run dev
-    ```
-
-6. **Visit the app:**
-    - Frontend: [http://localhost:3000](http://localhost:3000)
-
-## Usage
-
-- **Sign in** to your account.
-- **Add stocks** to your watchlist.
-- **Buy or sell** assets using your simulated balance.
-- **Track your purchases** and current asset values.
-- **Remove stocks** from your watchlist as needed.
-
-## Folder Structure
-
+## Project Structure
 ```
 causality/
 ├── app/
-│   └── Components/
-│       ├── account.js
-│       ├── dashboard.js
-│       └── ...
-├── public/
-├── styles/
-├── .env.local
-├── package.json
-└── README.md
+│   ├── Components/        # Reusable React components (e.g., Account, Portfolio)
+│   └── config.js          # Firebase configuration
+├── pages/                 # Next.js pages and routing
+├── public/                # Static assets (e.g., logos, icons)
+├── .env.local             # Environment variables (not committed)
+└── ...
 ```
 
-## License
+## How to Run
 
-This project is licensed under the MIT License.
+1. **Clone the repository**
+```
+git clone https://github.com/yourusername/causality.git
+cd causality/causality
+```
 
----
+2. **Install dependencies**
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Set up environment variables**
+
+Create a `.env.local\` file in the root directory and add:
+```env
+NEXT_PUBLIC_FINNHUB_API_KEY=your_finnhub_api_key
+```
+
+4. **Configure Firebase**
+Create a Firebase project and update `/app/config.js` with your Firebase project credentials:
+```js
+export const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+```
+
+5. **Start the development server**
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+Open your browser and go to [http://localhost:3000](http://localhost:3000)
+
+## How to Use
+
+1. **Sign in** with your Google account.
+2. **Search and add** stocks to your watchlist.
+3. **Buy and sell** stocks with your virtual balance.
+4. **Monitor your portfolio** and review the **transaction history**.
+5. **Simulate trading strategies** without any financial risk.
+
+*Enjoy learning the markets and building trading intuition with Causality!*
