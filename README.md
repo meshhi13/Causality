@@ -28,11 +28,16 @@ Before running the application, make sure you have the following installed and c
 ```
 causality/
 ├── app/
-│   ├── Components/        # Reusable React components (e.g., Account, Portfolio)
-│   └── config.js          # Firebase configuration
-├── pages/                 # Next.js pages and routing
-├── public/                # Static assets (e.g., logos, icons)
-├── .env.local             # Environment variables (not committed)
+│   ├── account/
+│   |   ├── page.js             
+│   ├── Components/
+|   |   ├── account.js
+|   |   ├── ...
+|   ├── dashboard/
+│   |   ├── page.js  
+│   └── config.js                       
+├── public/                
+├── .env
 └── ...
 ```
 
@@ -53,13 +58,13 @@ yarn install
 
 3. **Set up environment variables**
 
-Create a `.env.local\` file in the root directory and add:
+Create a `.env` file in the root directory and add:
 ```env
 NEXT_PUBLIC_FINNHUB_API_KEY=your_finnhub_api_key
 ```
 
 4. **Configure Firebase**
-Create a Firebase project and update `/app/config.js` with your Firebase project credentials:
+Create a Firebase project and update `/app/config.js` with your Firebase project credentials or include it in your `.env` file:
 ```js
 export const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -85,7 +90,7 @@ Open your browser and go to [http://localhost:3000](http://localhost:3000)
 1. **Sign in** with your Google account.
 2. **Search and add** stocks to your watchlist.
 3. **Buy and sell** stocks with your virtual balance.
-4. **Monitor your portfolio** and review the **transaction history**.
+4. **Monitor your portfolio** and review the transaction history.
 5. **Simulate trading strategies** without any financial risk.
 
-*Enjoy learning the markets and building trading intuition with Causality!*
+*Enjoy paper trading with Causality*
