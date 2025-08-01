@@ -46,7 +46,7 @@ causality/
 1. **Clone the repository**
 ```
 git clone https://github.com/yourusername/causality.git
-cd causality/causality
+cd Causality/causality
 ```
 
 2. **Install dependencies**
